@@ -1,11 +1,11 @@
 using System;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Newtonsoft.Json;
-using Npgsql;
 using StackExchange.Redis;
 
 namespace Worker
@@ -16,7 +16,7 @@ namespace Worker
         {
             try
             {
-                var pgsql = OpenDbConnection("Server=db;Username=postgres;");
+                var mssql = OpenSqlServerConnection("Server=db;User ID=sa;Password=changeme;Database=Votes");
                 var redis = OpenRedisConnection("redis").GetDatabase();
 
                 var definition = new { vote = "", voter_id = "" };
@@ -27,7 +27,7 @@ namespace Worker
                     {
                         var vote = JsonConvert.DeserializeAnonymousType(json, definition);
                         Console.WriteLine($"Processing vote for '{vote.vote}' by '{vote.voter_id}'");
-                        UpdateVote(pgsql, vote.voter_id, vote.vote);
+                        UpdateVote(mssql, vote.voter_id, vote.vote);
                     }
                 }
             }
@@ -38,29 +38,46 @@ namespace Worker
             }
         }
 
-        private static NpgsqlConnection OpenDbConnection(string connectionString)
+        private static void EnsureOpen(DbConnection connection)
         {
-            var connection = new NpgsqlConnection(connectionString);
             while (true)
             {
                 try
                 {
                     connection.Open();
-                    break;
+                    return;
                 }
                 catch (DbException)
                 {
                     Console.Error.WriteLine("Failed to connect to db - retrying");
+                    Thread.Sleep(500);
                 }
             }
+        }
 
-            var command = connection.CreateCommand();
-            command.CommandText = @"CREATE TABLE IF NOT EXISTS votes (
-                                        id VARCHAR(255) NOT NULL UNIQUE, 
-                                        vote VARCHAR(255) NOT NULL
-                                    )";
-            command.ExecuteNonQuery();
+        private static SqlConnection OpenSqlServerConnection(string connectionString)
+        {
+            var masterConnStrBuilder = new SqlConnectionStringBuilder(connectionString)
+            {
+                InitialCatalog = "master"
+            };
+            var master = new SqlConnection(masterConnStrBuilder.ConnectionString);
+            EnsureOpen(master);
+            var createDb = master.CreateCommand();
+            createDb.CommandText = @"IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'Votes')
+                                     CREATE DATABASE Votes";
+            createDb.ExecuteNonQuery();
 
+            var connection = new SqlConnection(connectionString);
+            EnsureOpen(connection);
+
+            var createTable = connection.CreateCommand();
+            createTable.CommandText = @"IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'votes')
+                                        CREATE TABLE votes (
+                                            id NVARCHAR(255) NOT NULL UNIQUE, 
+                                            vote NVARCHAR(255) NOT NULL
+                                        )";
+            createTable.ExecuteNonQuery();
             return connection;
         }
 
@@ -91,7 +108,7 @@ namespace Worker
                 .First(a => a.AddressFamily == AddressFamily.InterNetwork)
                 .ToString();
 
-        private static void UpdateVote(NpgsqlConnection connection, string voterId, string vote)
+        private static void UpdateVote(SqlConnection connection, string voterId, string vote)
         {
             var command = connection.CreateCommand();
             try

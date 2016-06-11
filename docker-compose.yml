@@ -40,9 +40,13 @@ services:
       - back-tier
 
   db:
-    image: postgres:9.4
-    volumes:
-      - "db-data:/var/lib/postgresql/data"
+    # image: postgres:9.4
+    image: fill_in_repo_for_mssql_here
+    environment:
+      SA_PASSWORD: changeme
+      ACCEPT_EULA: Y
+    # volumes:
+    #   - "db-data:/var/lib/postgresql/data"
     networks:
       - back-tier
 
