@@ -40,13 +40,10 @@ services:
       - back-tier
 
   db:
-    # image: postgres:9.4
-    image: fill_in_repo_for_mssql_here
+    image: private-repo.microsoft.com/mssql-private-preview/mssql-server:latest
     environment:
-      SA_PASSWORD: changeme
+      SA_PASSWORD: NeverCommitPasswordsToSourceExceptForDemos
       ACCEPT_EULA: Y
-    # volumes:
-    #   - "db-data:/var/lib/postgresql/data"
     networks:
       - back-tier
 

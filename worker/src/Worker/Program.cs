@@ -16,7 +16,7 @@ namespace Worker
         {
             try
             {
-                var mssql = OpenSqlServerConnection("Server=db;User ID=sa;Password=changeme;Database=Votes");
+                var mssql = OpenSqlServerConnection("Server=db;Database=Votes;User ID=sa;Password=NeverCommitPasswordsToSourceExceptForDemos");
                 var redis = OpenRedisConnection("redis").GetDatabase();
 
                 var definition = new { vote = "", voter_id = "" };
