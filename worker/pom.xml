@@ -28,6 +28,12 @@
         <artifactId>postgresql</artifactId>
         <version>9.4-1200-jdbc41</version>
     </dependency>
+    
+    <dependency>
+      <artifactId>sqljdbc4</artifactId>
+      <groupId>com.microsoft.sqlserver</groupId>
+      <version>4.0</version>
+    </dependency>
   </dependencies>
 
   <build>

@@ -9,6 +9,8 @@ RUN MAVEN_VERSION=3.3.3 \
 WORKDIR /code
 
 ADD pom.xml /code/pom.xml
+ADD /dependencies/sqljdbc4.jar /code/sqljdbc4.jar
+RUN mvn install:install-file -Dfile=sqljdbc4.jar -DgroupId=com.microsoft.sqlserver -DartifactId=sqljdbc4 -Dversion=4.0 -Dpackaging=jar
 RUN ["mvn", "dependency:resolve"]
 RUN ["mvn", "verify"]
 

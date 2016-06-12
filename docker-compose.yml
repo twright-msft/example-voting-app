@@ -21,6 +21,8 @@ services:
       - "5001:80"
     links:
       - db
+    depends_on:
+      - db
     networks:
       - front-tier
       - back-tier
@@ -40,14 +42,14 @@ services:
       - back-tier
 
   db:
-    image: postgres:9.4
-    volumes:
-      - "db-data:/var/lib/postgresql/data"
+    image: private-repo.microsoft.com/mssql-private-preview/mssql-server:latest
+    ports: 
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "sa"
+      ACCEPT_EULA: "Y"
     networks:
       - back-tier
-
-volumes:
-  db-data:
 
 networks:
   front-tier:

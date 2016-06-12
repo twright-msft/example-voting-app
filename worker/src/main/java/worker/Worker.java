@@ -3,6 +3,7 @@ package worker;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import java.sql.*;
+import com.microsoft.sqlserver.jdbc.*;
 import org.json.JSONObject;
 
 class Worker {
@@ -67,22 +68,35 @@ class Worker {
 
     try {
 
-      Class.forName("org.postgresql.Driver");
-      String url = "jdbc:postgresql://" + host + "/postgres";
+      Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+      String url = "jdbc:sqlserver://" + host + ":1433;database=master;user=sa;password=sa";
 
       while (conn == null) {
         try {
-          conn = DriverManager.getConnection(url, "postgres", "");
+          conn = DriverManager.getConnection(url);
         } catch (SQLException e) {
-          System.err.println("Failed to connect to db - retrying");
+          System.err.println(e);
           sleep(1000);
         }
       }
-
-      PreparedStatement st = conn.prepareStatement(
-        "CREATE TABLE IF NOT EXISTS votes (id VARCHAR(255) NOT NULL UNIQUE, vote VARCHAR(255) NOT NULL)");
-      st.executeUpdate();
-
+      
+      String dropDB =  
+            "IF EXISTS(SELECT * from sys.databases WHERE name='Votes')"  
+          + " BEGIN"  
+          + " DROP DATABASE Votes;"
+          + " END";
+          
+      PreparedStatement stDropDB = conn.prepareStatement(dropDB);
+      stDropDB.executeUpdate();
+      
+      String createDB = "CREATE DATABASE Votes;";
+      PreparedStatement stCreateDB = conn.prepareStatement(createDB);
+      stCreateDB.executeUpdate();
+      
+      String createTable = "USE Votes; CREATE TABLE votes (id VARCHAR(255) NOT NULL PRIMARY KEY, vote VARCHAR(255) NOT NULL);";
+      PreparedStatement stCreateTable = conn.prepareStatement(createTable);
+      stCreateTable.executeUpdate();
+      
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
       System.exit(1);
