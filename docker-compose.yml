@@ -21,6 +21,8 @@ services:
       - "5001:80"
     links:
       - db
+    depends_on:
+      - db
     networks:
       - front-tier
       - back-tier
@@ -41,14 +43,13 @@ services:
 
   db:
     image: private-repo.microsoft.com/mssql-private-preview/mssql-server:latest
+    ports: 
+      - "1433:1433"
     environment:
-      SA_PASSWORD: NeverCommitPasswordsToSourceExceptForDemos
-      ACCEPT_EULA: Y
+      SA_PASSWORD: "sa"
+      ACCEPT_EULA: "Y"
     networks:
       - back-tier
-
-volumes:
-  db-data:
 
 networks:
   front-tier:
