@@ -77,7 +77,9 @@ function debug(message) {
 function getVotes(connection) {
   console.log("Getting Votes...");
   var Request = require('tedious').Request;
-  request = new Request("SELECT (SELECT COUNT(*) FROM votes WHERE vote = 'a') AS 'a', (SELECT COUNT(*) FROM votes WHERE vote = 'b') AS 'b' FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;", function(err, rowCount) {
+  request = new Request("SELECT (SELECT COUNT(*) FROM votes WHERE vote = 'a') AS 'a'\
+                        , (SELECT COUNT(*) FROM votes WHERE vote = 'b') AS 'b' \
+                        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER;", function(err, rowCount) {
         if (err) {
             console.log(err);
         }

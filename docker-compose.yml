@@ -12,6 +12,29 @@ services:
     networks:
       - front-tier
       - back-tier
+  redis:
+    image: redis:alpine
+    ports: ["6379"]
+    networks:
+      - back-tier
+
+  worker:
+    build: ./worker
+    links:
+      - db
+      - redis
+    networks:
+      - back-tier
+
+  db:
+    image: private-repo.microsoft.com/mssql-private-preview/mssql-server:latest
+    ports: 
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "sa"
+      ACCEPT_EULA: "Y"
+    networks:
+      - back-tier
 
   result-app:
     build: ./result-app/.
@@ -25,30 +48,6 @@ services:
       - db
     networks:
       - front-tier
-      - back-tier
-
-  worker:
-    build: ./worker
-    links:
-      - db
-      - redis
-    networks:
-      - back-tier
-
-  redis:
-    image: redis:alpine
-    ports: ["6379"]
-    networks:
-      - back-tier
-
-  db:
-    image: private-repo.microsoft.com/mssql-private-preview/mssql-server:latest
-    ports: 
-      - "1433:1433"
-    environment:
-      SA_PASSWORD: "sa"
-      ACCEPT_EULA: "Y"
-    networks:
       - back-tier
 
 networks:

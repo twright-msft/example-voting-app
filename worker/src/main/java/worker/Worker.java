@@ -69,7 +69,7 @@ class Worker {
     try {
 
       Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-      String url = "jdbc:sqlserver://" + host + ":1433;database=master;user=sa;password=sa";
+      String url = "jdbc:sqlserver://" + host + ";database=master;user=sa;password=sa";
 
       while (conn == null) {
         try {
