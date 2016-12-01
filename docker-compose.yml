@@ -27,11 +27,11 @@ services:
       - back-tier
 
   db:
-    image: private-repo.microsoft.com/mssql-private-preview/mssql-server:latest
+    image: microsoft/mssql-server-linux:latest
     ports: 
       - "1433:1433"
     environment:
-      SA_PASSWORD: "sa"
+      SA_PASSWORD: "SuperSecretPassword1234"
       ACCEPT_EULA: "Y"
     networks:
       - back-tier
