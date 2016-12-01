@@ -27,7 +27,7 @@ setInterval(function () {
     var Connection = mssql.Connection;
     var config = {
         userName: 'sa'
-        ,password: 'sa'
+        ,password: 'SuperSecretPassword1234'
         ,server: 'db'
         ,options: {database:'Votes'}
         /* Uncomment if you need to debug connections/queries
